@@ -1,0 +1,14 @@
+tensorflow==2.16.1
+numpy==1.26.4
+pandas==2.2.1
+matplotlib==3.8.3
+scipy
+scikit-learn
+imblearn
+seaborn
+streamlit
+pillow
+click==8.1.7
+keras==3.3.3
+streamlit
+-e .
