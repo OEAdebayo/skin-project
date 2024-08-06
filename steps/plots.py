@@ -8,7 +8,6 @@ from keras import models
 
 
 
-# Save the model accuracy history
 def accuracy_history(modelHist:dict, 
                      output_dir:str,
                      figsize:tuple=(8, 6), 
@@ -31,7 +30,6 @@ def accuracy_history(modelHist:dict,
     -------
         None
     """
-    # Extract accuracy values from the history dictionary
     Acc_values = modelHist.get('accuracy')
     val_acc_values = modelHist.get('val_accuracy')
 
@@ -56,8 +54,7 @@ def accuracy_history(modelHist:dict,
     
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    
-    # Save plot with a default filename
+
     save_path = os.path.join(output_dir, 'accuracy_plot.png')
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()  
@@ -96,31 +93,23 @@ def conf_mat(model: models.Model,
         y_pred_prob = model.predict(x_dat, verbose=0)
         y_pred = [1 if y > 0.5 else 0 for y in y_pred_prob]
         y_dat = y_dat.astype(int)
-        # Calculate the confusion matrix
         cm = confusion_matrix(y_dat, y_pred)
-        # Define class labels
         classes = ['Benign', 'Malignant'] 
 
     elif classification_type == 'mc': 
         y_pred = np.argmax(model.predict(x_dat, verbose=0), axis=1)
         y_dat = np.argmax(y_dat, axis=1)
-        # Calculate the confusion matrix
         cm = confusion_matrix(y_dat, y_pred)
-        # Define class labels
-        classes = ['Benign', 'Malignant', 'Keloid']  # Define your class labels based on your specific problem
-
-    # Create the directory if it does not exist
+        classes = ['Benign', 'Malignant', 'Keloid'] 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # Plot confusion matrix
     plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, cmap='Blues', fmt='g', xticklabels=classes, yticklabels=classes)
     plt.xlabel('Predicted labels')
     plt.ylabel('True labels')
     plt.title('Confusion Matrix')
 
-    # Save the figure
     file_path = os.path.join(output_dir, 'confusion_matrix.png')
     plt.savefig(file_path)
     plt.close() 
@@ -173,19 +162,16 @@ def roc_curve_plot(model: models.Model,
         plt.title('Receiver Operating Characteristic (ROC) Curve')
         plt.legend(loc="lower right")
 
-        # Save the ROC curve plot
         file_path = os.path.join(output_dir, 'roc_curve.png')
         plt.savefig(file_path)
         plt.close()
         print(f"ROC curve saved at {file_path}")
 
     elif classification_type == 'mc':
-        # Get predicted probabilities for each class
         y_pred_prob = model.predict(x_dat, verbose=0)
         n_classes = y_dat.shape[1]
         classes = ['Benign', 'Malignant', 'Keloid']
 
-        # Binarize the output
         fpr = dict()
         tpr = dict()
         roc_auc = dict()
@@ -194,7 +180,6 @@ def roc_curve_plot(model: models.Model,
             fpr[i], tpr[i], _ = roc_curve(y_dat[:, i], y_pred_prob[:, i])
             roc_auc[i] = roc_auc_score(y_dat[:, i], y_pred_prob[:, i])
 
-        # Plot ROC curve for each class
         plt.figure(figsize=(10, 8))
         for i in range(n_classes):
             plt.plot(fpr[i], tpr[i], label=f'{classes[i]} (area = {roc_auc[i]:.4f})')
@@ -205,7 +190,6 @@ def roc_curve_plot(model: models.Model,
         plt.title('Receiver Operating Characteristic (ROC) Curve')
         plt.legend(loc="lower right")
 
-        # Save the ROC curve plot
         file_path = os.path.join(output_dir, 'roc_curve.png')
         plt.savefig(file_path)
         plt.close()
