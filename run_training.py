@@ -55,7 +55,7 @@ MODEL_CHOICES = {
     type=click.Choice(list(MODEL_CHOICES.keys())),  # Restrict choices to available models
     default='VG',
     help="""Specify which base model to train.
-        Choices are 'VG', 'MN', 'DN', 'IC'. Dfault to 'VG'
+        Choices are 'VG', 'MN', 'DN', 'IC'. Default to 'VG'
         """
 )
 @click.option(

@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="skin-disorder",
+    name="skin-project",
     version="0.0.1",
     author="Olusegun Ekundayo Adebayo",
     author_email="olusegun.adebayo@unvi-fcomte.fr",

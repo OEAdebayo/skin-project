@@ -5,8 +5,6 @@ import seaborn as sns
 import numpy as np
 from sklearn.metrics import confusion_matrix,roc_curve, roc_auc_score
 from keras import models
-from tensorflow.keras.models import load_model
-
 
 
 
@@ -23,10 +21,11 @@ def accuracy_history(modelHist:dict,
     Args:
     ----
         - modelHist:        Dictionary containing training accuracy and validation accuracy.
+        - output_dir:       The directory where the accuracy plot will be saved. Defaults to 'output'.
         - figsize:          Tuple specifying the figure size.
         - alpha:            Float specifying the transparency of the plot lines.
         - fontsize:         Integer specifying the font size for plot labels.
-        - output_dir:       The directory where the accuracy plot will be saved. Defaults to 'output'.
+        
 
     Returns:
     -------
@@ -49,26 +48,24 @@ def accuracy_history(modelHist:dict,
     plt.ylabel("Accuracy", fontsize=fontsize, weight='bold')
     plt.ylim(0, 1)
     
-    # Setting legend labels to bold
     font_prop = fm.FontProperties(weight='bold', size=fontsize)
     plt.legend(prop=font_prop, fontsize=fontsize, loc='lower right', frameon=True).get_frame().set_edgecolor('black')
     plt.grid(True)
     plt.xticks(fontsize=fontsize, fontweight='bold')
     plt.yticks(fontsize=fontsize, fontweight='bold')
     
-    # Create the directory if it does not exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
     # Save plot with a default filename
     save_path = os.path.join(output_dir, 'accuracy_plot.png')
     plt.savefig(save_path, bbox_inches='tight')
-    plt.close()  # Close the plot to free up memory
+    plt.close()  
     print(f"Model training history saved at {save_path}")
 
     return None
 
-# Save the confusion matrix
+
 def conf_mat(model: models.Model, 
              output_dir:str,
              x_dat: np.ndarray, 
@@ -131,7 +128,7 @@ def conf_mat(model: models.Model,
 
     return None
 
-def roc_curve_plot(model_dir: os.path, 
+def roc_curve_plot(model: models.Model, 
                    output_dir: str,
                    x_dat: np.ndarray, 
                    y_dat: np.ndarray,
@@ -152,8 +149,8 @@ def roc_curve_plot(model_dir: os.path,
     -------
         None
     """
-    
-    model = load_model(model_dir)
+
+
     if classification_type not in ("mc", "bc"):
         raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc' but classification_type: {classification_type} was given.")
     
@@ -161,14 +158,13 @@ def roc_curve_plot(model_dir: os.path,
         os.makedirs(output_dir)
     
     if classification_type == 'bc':
-        # Get predicted probabilities for the positive class
+        
         y_pred_prob = model.predict(x_dat, verbose=0)
-        # Calculate the ROC curve
+        
         fpr, tpr, _ = roc_curve(y_dat, y_pred_prob)
-        # Calculate the AUC score
+        
         auc_score = roc_auc_score(y_dat, y_pred_prob)
 
-        # Plot ROC curve
         plt.figure(figsize=(10, 8))
         plt.plot(fpr, tpr, color='blue', label=f'ROC curve (area = {auc_score:.2f})')
         plt.plot([0, 1], [0, 1], color='grey', linestyle='--')
@@ -201,7 +197,7 @@ def roc_curve_plot(model_dir: os.path,
         # Plot ROC curve for each class
         plt.figure(figsize=(10, 8))
         for i in range(n_classes):
-            plt.plot(fpr[i], tpr[i], label=f'{classes[i]} (area = {roc_auc[i]:.5f})')
+            plt.plot(fpr[i], tpr[i], label=f'{classes[i]} (area = {roc_auc[i]:.4f})')
 
         plt.plot([0, 1], [0, 1], color='grey', linestyle='--')
         plt.xlabel('False Positive Rate')

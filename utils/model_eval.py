@@ -30,19 +30,14 @@ def model_metric(model: models.Model,
         f1 = f1_score(y_dat, y_pred, average='weighted')
         precision = precision_score(y_dat, y_pred, average='weighted')
 
-        # Binarize the true labels for AUC calculation
         y_dat_binarized = label_binarize(y_dat, classes=np.arange(y_pred_prob.shape[1]))
         auc = roc_auc_score(y_dat_binarized, y_pred_prob, multi_class='ovr')
 
     elif classification_type == "bc":
         y_pred_prob = model.predict(x_dat, verbose=0)
-
-        # Find the class with the highest probability for each sample
         y_pred = [1 if y > 0.5 else 0 for y in y_pred_prob]
-
         y_dat = y_dat.astype(int)
 
-        # Calculate evaluation metrics
         accuracy = accuracy_score(y_dat, y_pred)
         precision = precision_score(y_dat, y_pred, average='binary')
         recall = recall_score(y_dat, y_pred, average='binary')
@@ -56,4 +51,3 @@ def model_metric(model: models.Model,
         precision=precision,
         auc=auc
     )
-

@@ -152,9 +152,9 @@ def training_pipeline(
     print(f"Model performance results saved at {mp_save_path}")
 
     # Save the trained model
-    logger.info("plotting the auc-roc curve...")
+    logger.info("plotting the roc curve...")
     roc_curve_plot(
-        model=model, #FIXME seems correct
+        model=model, 
         x_dat=datacontainer.X_test,
         y_dat=datacontainer.y_test,
         classification_type=classification_type,

@@ -5,7 +5,7 @@ This repository contains the codes for all the experiments performed in the pape
 ## Set up for running locally
 1. Clone the repository by running
     ```
-    git clone https://github.com/...
+    git clone https://github.com/OEAdebayo/skin-project.git
     ```
 1. Navigate to the root folder, i.e., `skin-project` and create a python virtual environment by running
     ```

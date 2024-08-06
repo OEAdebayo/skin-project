@@ -2,13 +2,12 @@ tensorflow==2.16.1
 numpy==1.26.4
 pandas==2.2.1
 matplotlib==3.8.3
-scipy
-scikit-learn
-imblearn
-seaborn
-streamlit
-pillow
+scipy==1.14.0
+scikit-learn==1.5.1
+imblearn==0.12.3
+seaborn==0.13.2
+streamlit==1.36.0
+pillow==10.4.0
 click==8.1.7
 keras==3.3.3
-streamlit
 -e .

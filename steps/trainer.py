@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import label_binarize
 
+
+
 def get_fitted_model_bc(input_shape: tuple, 
                         X_train: np.ndarray,
                         y_train: np.ndarray,
@@ -70,7 +72,6 @@ def get_fitted_model_mc(input_shape: tuple,
                                  include_top=False, 
                                  input_shape=input_shape)
 
-    # Freeze the weights of the pre-trained model
     for layer in pretrained_model.layers:
         layer.trainable = fine_tune
 
@@ -83,10 +84,10 @@ def get_fitted_model_mc(input_shape: tuple,
         layers.Dense(3, activation='softmax')
     ])
 
-    '''if fine_tune==True:
+    if fine_tune==True:
         optimizer = optimizers.Adam(learning_rate=0.00001)
-    else:'''
-    optimizer = optimizers.Adam(learning_rate=0.0001)
+    else:
+        optimizer = optimizers.Adam(learning_rate=0.0001)
     model.compile(loss='categorical_crossentropy',
                   optimizer=optimizer,
                   metrics=['accuracy'])
@@ -139,7 +140,6 @@ def cross_val(X: np.ndarray,
         X_train_c, X_val_c = X[train_index], X[val_index]
         Y_train_c, Y_val_c = y[train_index], y[val_index]
 
-        # Create and fit the model
         if classification_type == 'mc':
             model = get_fitted_model_mc(input_shape=input_shape,
                                         X_train=X_train_c,
@@ -165,8 +165,6 @@ def cross_val(X: np.ndarray,
             prec_ = precision_score(Y_val_c, Y_pred, average='weighted')
             rec_ = recall_score(Y_val_c, Y_pred, average='weighted')
             f1_ = f1_score(Y_val_c, Y_pred, average='weighted')
-            
-            # Binarize the true labels for AUC calculation
             Y_val_c_binarized = label_binarize(Y_val_c, classes=np.arange(Y_pred_prob.shape[1]))
             auc_ = roc_auc_score(Y_val_c_binarized, Y_pred_prob, multi_class='ovr')
 
@@ -189,7 +187,6 @@ def cross_val(X: np.ndarray,
             
             Y_pred_prob = model.predict(X_val_c, verbose=0)
             Y_pred = [1 if y > 0.5 else 0 for y in Y_pred_prob]
-
             Y_val_c = Y_val_c.astype(int)
 
             acc_ = accuracy_score(Y_val_c, Y_pred)
@@ -198,14 +195,12 @@ def cross_val(X: np.ndarray,
             f1_ = f1_score(Y_val_c, Y_pred, average='binary')
             auc_ = roc_auc_score(Y_val_c, Y_pred_prob)
 
-        # Collect metrics for this fold
         acc.append(acc_)
         prec.append(prec_)
         rec.append(rec_)
         f1s.append(f1_)
         aucs.append(auc_)
     
-    # Compute average metrics
     avg_prec = np.mean(prec)
     avg_rec = np.mean(rec)
     avg_f1 = np.mean(f1s)
