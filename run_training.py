@@ -27,7 +27,7 @@ MODEL_CHOICES = {
     "--cv",
     is_flag=True,
     default=False,
-    help="""Specify whether to cross validate the model or not'. Default to False
+    help="""Specify whether to cross validate the model or not'. Default to False.
         """
 )
 @click.option(
@@ -40,19 +40,19 @@ MODEL_CHOICES = {
 @click.option(
     "--output_dir",
     default="output",
-    help="""Specify directory to save the outputs of the training.  Default to 'output'
+    help="""Specify directory to save the outputs of the training.  Default to 'output'.
         """
 )
 @click.option(
     "--fine_tune",
     is_flag=True,
     default=False,
-    help="""Specify whether to fine-tune the base model or not. Default to False
+    help="""Specify whether to fine-tune the base model or not. Default to False.
         """
 )
 @click.option(
     "--basemodel",
-    type=click.Choice(list(MODEL_CHOICES.keys())),  # Restrict choices to available models
+    type=click.Choice(list(MODEL_CHOICES.keys())), 
     default='VG',
     help="""Specify which base model to train.
         Choices are 'VG', 'MN', 'DN', 'IC'. Default to 'VG'
