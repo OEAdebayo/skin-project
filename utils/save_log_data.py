@@ -22,11 +22,14 @@ def save_keras_model(model: models.Model,
         None
     """
 
+    # Create the directory if it does not exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
+    
+    # Construct the full path to save the model
     save_path = os.path.join(output_dir, model_name)
-
+    
+    # Save the model
     model.save(save_path)
     print(f"Model saved at {save_path}")
 

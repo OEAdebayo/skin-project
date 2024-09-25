@@ -15,7 +15,8 @@ def training_pipeline(
     fine_tune: bool,
     no_epochs: int,
     cv: bool,
-    output_dir: str
+    output_dir: str,
+    custom=None,
 ) -> None:
     
     config_logger()
@@ -39,7 +40,6 @@ def training_pipeline(
         resize_shape=(128, 128), 
         dir = "data/test_set1"
     )
-
 
     datacontainer = standardize_data(
         train_features=X_train,
@@ -68,7 +68,6 @@ def training_pipeline(
         )
         
         # Redirecting output to a file for cross-validation results
-        
         cv_fname = 'cv_result.txt'
         cv_save_path = os.path.join(output_dir, cv_fname)
         logger.info(f"Saving cross validation result")
@@ -92,6 +91,7 @@ def training_pipeline(
             y_train=datacontainer.y_train,
             X_val=datacontainer.X_val,
             y_val=datacontainer.y_val,
+            custom = custom,
             fine_tune=fine_tune,
             basemodel=basemodel,
             no_epochs=no_epochs,
@@ -104,6 +104,7 @@ def training_pipeline(
             y_train=datacontainer.y_train,
             X_val=datacontainer.X_val,
             y_val=datacontainer.y_val,
+            custom = custom,
             fine_tune=fine_tune,
             basemodel=basemodel,
             no_epochs=no_epochs,
@@ -152,9 +153,9 @@ def training_pipeline(
     print(f"Model performance results saved at {mp_save_path}")
 
     # Save the trained model
-    logger.info("plotting the roc curve...")
+    logger.info("plotting the auc-roc curve...")
     roc_curve_plot(
-        model=model, 
+        model=model, #FIXME seems correct
         x_dat=datacontainer.X_test,
         y_dat=datacontainer.y_test,
         classification_type=classification_type,

@@ -56,8 +56,10 @@ def load_test_or_val_data(classification_type:str,
     resize_shape:               takes a tuple of int
     """
     
+    # load test data
     loaded_test_data = data_loading(data_dir = dir)
 
+    # resize test data
     resized_test_data =  data_class_restructuring(df = loaded_test_data,
                                         classification_type= classification_type,
                                         resize=resize_shape)

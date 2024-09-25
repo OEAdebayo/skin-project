@@ -21,7 +21,7 @@ def data_loading(data_dir: Path)-> object:
 
     Args:
     ----
-        -data_dir:   a directory to the image data for training
+        -data:   a directory to the image data for training
 
     Returns:
     -------
@@ -55,12 +55,12 @@ def data_class_restructuring(df,
     Args:
     ----
         -df:                     a DataFrame object with 10 classes
-        -resize(tuple):          a tuple of integers (a(int), b(int)) containing the new size we wish to have
         -classification_type     a str of maliangnat vs benign--'bc' or maliagnant vs benign vs keloids--'mc'
+        -resize(tuple):          a tuple of integers (a(int), b(int)) containing the new size we wish to have
         -image(str):             a column in df that takes exactly the string 'image_path' if given. Should be given if and only if arg: resize is given
         -image_path(str):        a column in df that takes exactly the string 'image_path' if given. Should be given if and only if arg: resize is given
         -class_label(str):       the old label to drop after reclassifying df 
-
+        -new_column(str):        The name of the new label 
     
     Returns:
     -------
@@ -68,15 +68,16 @@ def data_class_restructuring(df,
 
 
     """
-
+    #if (resize and image and image_path):
        
+    # Get the number of CPU cores available
     max_workers = multiprocessing.cpu_count()
     import concurrent.futures
 
     def convert_rgba_to_rgb(image_array):
-        if image_array.shape[2] == 4:  
+        if image_array.shape[2] == 4:  # Check if the image has 4 channels (RGBA)
             image = Image.fromarray(image_array)
-            image = image.convert("RGB") 
+            image = image.convert("RGB")  # Convert to RGB
             return np.array(image)
         return image_array
 
@@ -84,14 +85,16 @@ def data_class_restructuring(df,
         image = Image.open(image_path).resize(resize)
         image_array = np.asarray(image)
         
+        # Convert RGBA to RGB if necessary
         image_array = convert_rgba_to_rgb(image_array)
         
         return image_array
     
-    df_use = df.copy() 
+    df_use = df.copy() # get a copy of the dataframe to use
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
 
+        # Use executor.map to apply the function to each image path in the DataFrame
         image_arrays = list(executor.map(resize_image_array,
                                          df_use[image_path].tolist()))
         
@@ -152,8 +155,7 @@ def data_augmentation(df:pd.DataFrame,
     ----
         -df:                    a DataFrame object
         -class_image_limit:     expected maximum number of images  per class
-        -class_label:           label of containing the diagnosis for each image
-        -column_list:           a list of strings containing the column names for the augmented dataframe in this order ["image_path", "classcode", "image"]
+        -column_names:          a list of strings containing the column names for the augmented dataframe in this order ["image_path", "classcode", "image"]
     
     Returns:
     -------
@@ -176,48 +178,63 @@ def data_augmentation(df:pd.DataFrame,
 
     for code in df[class_label].unique():
         df_ = df.copy()
+        # Get the image arrays for the current class
         image_arrays = df_.loc[df[class_label] == code, 
                                column_list[2]].values
         
+        # Calculate the number of additional images needed for the current class
         num_images_needed = class_image_limit - len(image_arrays)
        
+        # Generate augmented images for the current class
         if num_images_needed > 0:
 
+            # Select (size e.g, 5) random subset of the original images (i.e., image_arrays) 
             selected_images = np.random.choice(image_arrays, 
                                                size=num_images_needed)
-
+            
+            # Apply transformations to the selected images and add them to the augmented dataframe
             for image_array in selected_images:
 
+                # Reshape the image array to a 4D tensor with a batch size of 1
                 image_tensor = np.expand_dims(image_array,
                                               axis=0)
-
+                
+                # Generate the augmented images
                 augmented_images = datagen.flow(image_tensor, 
                                                 batch_size=1)
-
+        
+                # Extract the augmented image arrays and add them to the augmented dataframe
                 for i in range(augmented_images.n):
+                    #augmented_image_array = augmented_images.next()[0].astype('uint8')
                     augmented_image_array = augmented_images.__next__()[0].astype('float32')
-
+                    
+                    #augmented_df = augmented_df.append({'image_path': None, 'label': class_label, 'image': augmented_image_array}, ignore_index=True)
                     row_to_append = pd.DataFrame({column_list[0]: None, 
                                                   column_list[1]: [code], 
                                                   column_list[2]: [augmented_image_array]})
 
+                    # Concatenate the new row with the original DataFrame
                     new_augment_df = pd.concat([new_augment_df, 
                                                 row_to_append], 
                                                 ignore_index=True)
-
+            #num_images_needed-=1
+                    # Add the original images for the current class to the augmented dataframe
         original_images_df = df_.loc[df_[class_label] == code, 
                                      column_list]
 
+        #print(augmented_df.shape, original_images_df.shape)
         new_augment_df = pd.concat([original_images_df, 
                                     new_augment_df], 
                                     axis = 0, 
                                     ignore_index=True)
 
+        # Shuffle the dataframe for further processing
         df_shuffled= new_augment_df.sample(frac=1, 
                                            random_state=42, 
                                            ignore_index=True)
     return df_shuffled
 
+# Function to... 
 def features_target(df:pd.DataFrame):
     """
     Function to extract features and target from a dataframe
@@ -238,24 +255,28 @@ def data_oversample(X: np.ndarray, y: np.ndarray) -> dict:
 
     Returns:
     -------
-        A dictionary containing the oversampled X--features and y--target values.
+        A dictionary containing the resampled X--features and y--target values.
     """
 
     if len(X.shape) == 2:
+        # If X is already a 2D array, no need to reshape
         X_train_reshaped = X
     elif len(X.shape) == 4:
+        # Reshape images to 2D arrays
         num_samples, height, width, channels = X.shape
         X_train_reshaped = X.reshape(num_samples, height * width * channels)
     else:
         raise ValueError("Input X must be either 2D or 4D numpy array")
 
+    # Random oversampling
     random_oversampler = RandomOverSampler(random_state=42)
     X_resampled, y_resampled = random_oversampler.fit_resample(X_train_reshaped, y)
 
+    # After oversampling, reshape X_resampled back to 4D tensor if needed
     if len(X.shape) == 4:
         X_resampled_4d = X_resampled.reshape(-1, height, width, channels)
     else:
-        X_resampled_4d = X_resampled 
+        X_resampled_4d = X_resampled  # No need to reshape if it was originally 2D
 
     resamp_data = {
         "X_resampled": X_resampled_4d,
@@ -285,8 +306,6 @@ def standardize_data(
         )->TrainTestData:
     """
     Function to standardize the dataset.
-
-
     Args:
     ----
 
