@@ -1,0 +1,10 @@
+/experiments
+/hh.ipynb
+##pipelines
+/run.py
+/sdvenv
+/skin_disorder.egg-info
+/data
+/all_results
+/csv_file
+/__pycache__
