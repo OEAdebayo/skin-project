@@ -17,10 +17,10 @@ def model_metric(model: models.Model,
                  y_dat: np.ndarray,
                  classification_type: str) -> ModelPerformance:
     
-    if classification_type not in ("mc", "bc"):
-        raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc' but classification_type: {classification_type} was given")
+    if classification_type not in ("mc", "bc", "kl"):
+        raise ValueError(f"The 'classification_type' parameter only takes values 'mc' , 'kl' or 'bc' but classification_type: {classification_type} was given")
 
-    if classification_type == "mc":
+    if classification_type in ('mc', 'kl'):
         y_pred_prob = model.predict(x_dat, verbose=0)
         y_pred = np.argmax(y_pred_prob, axis=1)
         y_dat = np.argmax(y_dat, axis=1)

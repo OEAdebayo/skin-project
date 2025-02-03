@@ -5,7 +5,7 @@ import pathlib as Path
 import multiprocessing
 from PIL import Image
 import numpy as np
-from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
+from imblearn.over_sampling import RandomOverSampler
 from keras import utils
 from dataclasses import dataclass
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -100,8 +100,8 @@ def data_class_restructuring(df,
         
 
     df_use[image] = image_arrays
-    if classification_type not in ("mc", "bc"):
-        raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc' but classification_type: {classification_type} was giving ")
+    if classification_type not in ("mc", "bc", "kl"):
+        raise ValueError(f"The 'classification_type' parameter only takes values 'mc', 'bc' or 'kl' but classification_type: {classification_type} was giving ")
 
     
     elif classification_type =='bc': 
@@ -119,7 +119,7 @@ def data_class_restructuring(df,
 
     elif classification_type =='mc': 
     
-        def malignant_benign_keloid(directory_name:int) -> int:
+        def malignant_benign_keloid(directory_name:str) -> int:
             """
             Converts directory name into a new class label (int).
 
@@ -140,6 +140,22 @@ def data_class_restructuring(df,
                 return 0
            
         df_use[class_label] = df_use[class_label].map(malignant_benign_keloid)
+        df_use[class_label] = df_use[class_label].astype(int) 
+
+    elif classification_type =='kl': 
+        
+        def keloid_lookalikes(directory_name: str) -> int:
+            needed_classes = {'SCC': 0, 'BCC': 1, 'KLD': 2}
+    
+            if directory_name not in needed_classes:
+                return None  
+    
+            return needed_classes[directory_name]  
+
+        # Apply the function and force integer type
+        df_use[class_label] = df_use[class_label].map(keloid_lookalikes)
+        df_use = df_use[df_use[class_label].notna()]  
+        df_use[class_label] = df_use[class_label].astype(int) 
     
     return df_use    
 
@@ -165,8 +181,6 @@ def data_augmentation(df:pd.DataFrame,
     """
     new_augment_df = pd.DataFrame(columns=column_list)
 
-        # Create an ImageDataGenerator object with the desired transformations
-
     datagen = ImageDataGenerator(
         rotation_range=20,
         width_shift_range=0.2,
@@ -185,56 +199,47 @@ def data_augmentation(df:pd.DataFrame,
         # Calculate the number of additional images needed for the current class
         num_images_needed = class_image_limit - len(image_arrays)
        
-        # Generate augmented images for the current class
         if num_images_needed > 0:
 
-            # Select (size e.g, 5) random subset of the original images (i.e., image_arrays) 
             selected_images = np.random.choice(image_arrays, 
                                                size=num_images_needed)
             
-            # Apply transformations to the selected images and add them to the augmented dataframe
             for image_array in selected_images:
 
-                # Reshape the image array to a 4D tensor with a batch size of 1
+                
                 image_tensor = np.expand_dims(image_array,
                                               axis=0)
                 
-                # Generate the augmented images
+               
                 augmented_images = datagen.flow(image_tensor, 
                                                 batch_size=1)
         
                 # Extract the augmented image arrays and add them to the augmented dataframe
                 for i in range(augmented_images.n):
-                    #augmented_image_array = augmented_images.next()[0].astype('uint8')
+                    
                     augmented_image_array = augmented_images.__next__()[0].astype('float32')
                     
-                    #augmented_df = augmented_df.append({'image_path': None, 'label': class_label, 'image': augmented_image_array}, ignore_index=True)
                     row_to_append = pd.DataFrame({column_list[0]: None, 
                                                   column_list[1]: [code], 
                                                   column_list[2]: [augmented_image_array]})
 
-                    # Concatenate the new row with the original DataFrame
                     new_augment_df = pd.concat([new_augment_df, 
                                                 row_to_append], 
                                                 ignore_index=True)
-            #num_images_needed-=1
-                    # Add the original images for the current class to the augmented dataframe
+            
         original_images_df = df_.loc[df_[class_label] == code, 
                                      column_list]
 
-        #print(augmented_df.shape, original_images_df.shape)
         new_augment_df = pd.concat([original_images_df, 
                                     new_augment_df], 
                                     axis = 0, 
                                     ignore_index=True)
 
-        # Shuffle the dataframe for further processing
         df_shuffled= new_augment_df.sample(frac=1, 
                                            random_state=42, 
                                            ignore_index=True)
     return df_shuffled
-
-# Function to... 
+ 
 def features_target(df:pd.DataFrame):
     """
     Function to extract features and target from a dataframe
@@ -342,10 +347,10 @@ def standardize_data(
     X_test_std = np.std(X_test)
     std_X_test = (X_test - X_test_mean)/X_test_std
 
-    if classification_type not in("mc", "bc"):
-        raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc' but classification_type: {classification_type} was given ")
+    if classification_type not in("mc", "bc", "kl"):
+        raise ValueError(f"The 'classification_type' parameter only takes values 'mc' 'kl' or 'bc' but classification_type: {classification_type} was given ")
 
-    elif classification_type =='mc': 
+    elif classification_type in ('mc', 'kl'): 
         y_train_cat = utils.to_categorical(y_train, 
                                            num_classes = 3)
         y_val_cat = utils.to_categorical(y_val, 
@@ -399,10 +404,10 @@ def standardize_test_data(
     X_test_std = np.std(X_test)
     std_X_test = (X_test - X_test_mean)/X_test_std
 
-    if classification_type not in("mc", "bc"):
+    if classification_type not in("mc", "bc", "kl"):
         raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc' but classification_type: {classification_type} was given ")
 
-    elif classification_type =='mc': 
+    elif classification_type in ('mc', 'kl'): 
         y_test_cat = utils.to_categorical(y_test, 
                                           num_classes = 3)
 
@@ -460,10 +465,10 @@ def standardize_and_merge(
     std_X_combined = (X_combined - X_combined_mean)/X_combined_std
 
 
-    if classification_type not in("mc", "bc"):
-        raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc' but classification_type: {classification_type} was given ")
+    if classification_type not in("mc", "bc", "kl"):
+        raise ValueError(f"The 'classification_type' parameter only takes values 'mc','bc' or 'kl' but classification_type: {classification_type} was given ")
 
-    elif classification_type =='mc': 
+    elif classification_type in ('mc', 'kl'): 
         y_combined_cat = utils.to_categorical(y_combined, 
                                            num_classes = 3)
 
