@@ -32,7 +32,7 @@ def roc_curve_plot_pipeline(
         classification_type=classification_type
     )
 
-    if classification_type not in ("mc", "bc"):
+    if classification_type not in ("mc", "bc", "kl"):
         raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc', but got {classification_type}.")
 
     # Plot and save confusion matrix

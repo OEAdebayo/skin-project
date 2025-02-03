@@ -51,7 +51,7 @@ def training_pipeline(
         classification_type=classification_type
     )
 
-    if classification_type not in ("mc", "bc"):
+    if classification_type not in ("mc", "bc", "kl"):
         raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc', but got {classification_type}.")
 
     # Perform cross-validation if specified
@@ -84,7 +84,7 @@ def training_pipeline(
 
     # Train the final model
     logger.info(f"Training {classification_type} model...")
-    if classification_type == 'mc':
+    if classification_type in ('mc', 'kl'):
         model, history = get_fitted_model_mc(
             input_shape=(128, 128, 3),
             X_train=datacontainer.X_train,
