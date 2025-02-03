@@ -34,12 +34,12 @@ This repository contains the codes for all the experiments performed in the pape
 If you use this work in your project, please reference:
 
     @article{OLUSEGUNETAL2024,
-        title = {Machine learning and deep learning approaches for classifying keloid images in the context of malignant and benign skin disorders.},
-        author = {Olusegun Ekundayo and Dumitru Trucu and Raluca Eftimie},
+        title = {Deep Learning Approaches for the Classification of Keloid Images in the Context of Malignant and Benign Skin Disorders.},
+        author = {Olusegun Ekundayo and Brice Chatelain and Dumitru Trucu and Raluca Eftimie},
         journal = {...},
         volume = {...},
         pages = {...},
-        year = {2024},
+        year = {2025},
         issn = {...},
         doi = {...},
         url = {https://www...}
