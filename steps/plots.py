@@ -65,7 +65,6 @@ def accuracy_history(modelHist:dict,
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()  # Close the plot to free up memory
     print(f"Model training history saved at {save_path}")
-
     return None
 
 # Save the confusion matrix
@@ -92,36 +91,40 @@ def conf_mat(model: models.Model,
         None
     """
 
-    if classification_type not in ("mc", "bc"):
-        raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc' but classification_type: {classification_type} was given.")
+    if classification_type not in ("mc", "bc", "kl"):
+        raise ValueError(f"The 'classification_type' parameter only takes values 'mc', 'bc' or 'kl' but classification_type: {classification_type} was given.")
     
     elif classification_type == 'bc': 
         y_pred_prob = model.predict(x_dat, verbose=0)
         y_pred = [1 if y > 0.5 else 0 for y in y_pred_prob]
         y_dat = y_dat.astype(int)
-        # Calculate the confusion matrix
         cm = confusion_matrix(y_dat, y_pred)
-        # Define class labels
         classes = ['Benign', 'Malignant'] 
 
     elif classification_type == 'mc': 
         y_pred = np.argmax(model.predict(x_dat, verbose=0), axis=1)
         y_dat = np.argmax(y_dat, axis=1)
-        # Calculate the confusion matrix
         cm = confusion_matrix(y_dat, y_pred)
-        # Define class labels
-        classes = ['Benign', 'Malignant', 'Keloid']  # Define your class labels based on your specific problem
+        classes = ['Benign', 'Malignant', 'Keloid']  
 
-    # Create the directory if it does not exist
+    elif classification_type == 'kl': 
+        y_pred = np.argmax(model.predict(x_dat, verbose=0), axis=1)
+        y_dat = np.argmax(y_dat, axis=1)
+        cm = confusion_matrix(y_dat, y_pred)
+        classes = ['SquamousCC', 'BasalCC', 'Keloid']
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # Plot confusion matrix
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(cm, annot=True, cmap='Blues', fmt='g', xticklabels=classes, yticklabels=classes)
-    plt.xlabel('Predicted labels')
-    plt.ylabel('True labels')
-    plt.title('Confusion Matrix')
+
+    plt.figure(figsize=(12, 10))
+    sns.set(font_scale=2.5)
+    sns.heatmap(cm, annot=True, cmap='Blues', fmt='g', xticklabels=classes, yticklabels=classes, annot_kws={"size": 30})
+    plt.xlabel('Predicted labels', fontsize=30)
+    plt.ylabel('True labels', fontsize=30)
+    plt.title('Confusion Matrix', fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
 
     # Save the figure
     file_path = os.path.join(output_dir, 'confusion_matrix.png')
@@ -154,8 +157,8 @@ def roc_curve_plot(model: models.Model,
     """
     
     #model = load_model(model_dir)
-    if classification_type not in ("mc", "bc"):
-        raise ValueError(f"The 'classification_type' parameter only takes values 'mc' or 'bc' but classification_type: {classification_type} was given.")
+    if classification_type not in ("mc", "bc", "kl"):
+        raise ValueError(f"The 'classification_type' parameter only takes values 'mc', 'bc' or 'kl' but classification_type: {classification_type} was given.")
     
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -169,13 +172,16 @@ def roc_curve_plot(model: models.Model,
         auc_score = roc_auc_score(y_dat, y_pred_prob)
 
         # Plot ROC curve
-        plt.figure(figsize=(10, 8))
+        plt.figure(figsize=(12, 10))
         plt.plot(fpr, tpr, color='blue', label=f'ROC curve (area = {auc_score:.2f})')
         plt.plot([0, 1], [0, 1], color='grey', linestyle='--')
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('Receiver Operating Characteristic (ROC) Curve')
-        plt.legend(loc="lower right")
+        plt.xlabel('False Positive Rate', fontsize=30)
+        plt.ylabel('True Positive Rate', fontsize=30)
+        plt.xticks(fontsize=30)
+        plt.yticks(fontsize=30)
+        plt.title('ROC Curve', fontsize=30)
+        plt.legend(loc="lower right", fontsize=30)
+        
 
         # Save the ROC curve plot
         file_path = os.path.join(output_dir, 'roc_curve.png')
@@ -184,7 +190,6 @@ def roc_curve_plot(model: models.Model,
         print(f"ROC curve saved at {file_path}")
 
     elif classification_type == 'mc':
-        # Get predicted probabilities for each class
         y_pred_prob = model.predict(x_dat, verbose=0)
         n_classes = y_dat.shape[1]
         classes = ['Benign', 'Malignant', 'Keloid']
@@ -199,15 +204,51 @@ def roc_curve_plot(model: models.Model,
             roc_auc[i] = roc_auc_score(y_dat[:, i], y_pred_prob[:, i])
 
         # Plot ROC curve for each class
-        plt.figure(figsize=(10, 8))
+        plt.figure(figsize=(12, 10))
         for i in range(n_classes):
             plt.plot(fpr[i], tpr[i], label=f'{classes[i]} (area = {roc_auc[i]:.5f})')
 
         plt.plot([0, 1], [0, 1], color='grey', linestyle='--')
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('Receiver Operating Characteristic (ROC) Curve')
-        plt.legend(loc="lower right")
+        plt.xlabel('False Positive Rate', fontsize=30)
+        plt.ylabel('True Positive Rate', fontsize=30)
+        plt.xticks(fontsize=30)
+        plt.yticks(fontsize=30)
+        plt.title('ROC Curve', fontsize=30)
+        plt.legend(loc="lower right", fontsize=30)
+
+        # Save the ROC curve plot
+        file_path = os.path.join(output_dir, 'roc_curve.png')
+        plt.savefig(file_path)
+        plt.close()
+        print(f"ROC curve saved at {file_path}")
+
+    elif classification_type == 'kl':
+        # Get predicted probabilities for each class
+        y_pred_prob = model.predict(x_dat, verbose=0)
+        n_classes = y_dat.shape[1]
+        classes = ['SquamousCC', 'BasalCC', 'Keloid']
+
+        # Binarize the output
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = roc_curve(y_dat[:, i], y_pred_prob[:, i])
+            roc_auc[i] = roc_auc_score(y_dat[:, i], y_pred_prob[:, i])
+
+        # Plot ROC curve for each class
+        plt.figure(figsize=(12, 10))
+        for i in range(n_classes):
+            plt.plot(fpr[i], tpr[i], label=f'{classes[i]} (area = {roc_auc[i]:.5f})')
+
+        plt.plot([0, 1], [0, 1], color='grey', linestyle='--')
+        plt.xlabel('False Positive Rate', fontsize=30)
+        plt.ylabel('True Positive Rate', fontsize=30)
+        plt.xticks(fontsize=30)
+        plt.yticks(fontsize=30)
+        plt.title('ROC Curve', fontsize=30)
+        plt.legend(loc="lower right", fontsize=30)
 
         # Save the ROC curve plot
         file_path = os.path.join(output_dir, 'roc_curve.png')

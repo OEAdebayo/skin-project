@@ -1,7 +1,8 @@
 import click
 import os
 from pipelines.training import training_pipeline
-from tensorflow.keras.applications import VGG16, MobileNet, DenseNet121, InceptionV3
+from tensorflow.keras.applications import VGG16, MobileNet, DenseNet121, InceptionV3,EfficientNetB0, \
+     Xception, InceptionResNetV2,EfficientNetV2L,NASNetLarge
 
 # Define the available models and their mappings
 MODEL_CHOICES = {
@@ -9,18 +10,23 @@ MODEL_CHOICES = {
     'MN': MobileNet,
     'DN': DenseNet121,
     'IC': InceptionV3,
+    'EF': EfficientNetB0,
+    'XC': Xception,
+    'IR': InceptionResNetV2,
+    'EV': EfficientNetV2L,
+    'NN': NASNetLarge
 }
 
 @click.command(
     help="""
-    Entry point for running the 'bc', 'mc' models.
+    Entry point for running the 'bc', 'mc' 'kl' models.
     """
 )
 @click.option(
     "--classification_type",
     default="mc",
     help="""Specify which classification type to run.
-        Valid options are 'bc' or 'mc'. Default to 'mc'.
+        Valid options are 'bc', 'mc' or 'kl'. Default to 'mc'.
         """
 )
 @click.option(
@@ -57,10 +63,10 @@ MODEL_CHOICES = {
 )
 @click.option(
     "--basemodel",
-    type=click.Choice(list(MODEL_CHOICES.keys())),  # Restrict choices to available models
+    type=click.Choice(list(MODEL_CHOICES.keys())),  
     default='VG',
     help="""Specify which base model to train.
-        Choices are 'VG', 'MN', 'DN', 'IC'. Dfault to 'VG'
+        Choices are 'VG', 'MN', 'DN', 'IC', 'EF','CN','XC','IR','EV', 'NN' . Default to 'VG'
         """
 )
 @click.option(

@@ -52,7 +52,7 @@ def load_test_or_val_data(classification_type:str,
                             dir:str,              
                             )->tuple:
     """
-    classification_type:        takes a str 'aug', 'oversampling', or 'none'
+    classification_type:        takes a str 'mc' or 'bc'
     resize_shape:               takes a tuple of int
     """
     

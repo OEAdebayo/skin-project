@@ -182,7 +182,7 @@ def cross_val(X: np.ndarray,
         Y_train_c, Y_val_c = y[train_index], y[val_index]
 
         # Create and fit the model
-        if classification_type == 'mc':
+        if classification_type in ('mc' or 'kl'):
             model = get_fitted_model_mc(input_shape=input_shape,
                                         X_train=X_train_c,
                                         y_train=Y_train_c,
