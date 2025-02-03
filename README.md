@@ -12,7 +12,7 @@ This repository contains the codes for all the experiments performed in the pape
     ```bash
     python -V
     ```
-    If the python version is below python 12 check [this link](https://github.com/pyenv/pyenv) to install pyenv and setup your python 12 environment.
+    If the python version is below python12 check [this link](https://github.com/pyenv/pyenv) to install setup your python12 environment using pyenv.
     Check the python version again using the command above and make sure its at least python 12.
 
 1. Navigate to the root folder, i.e., `skin-project` and create a python virtual environment by running
