@@ -22,7 +22,7 @@ This repository contains the codes for all the experiments performed in the pape
     make create-required-dir
     ```
 
-1. You can then start running entry point (`run_training.py` for the model training and various experiment pipelines respectively) with their respective arguments as CLI. For instance to train the proposed models without fine-tuning the base models and with the original train data for the binary classification task run:
+1. You can then start running entry point (`run_training.py` for the model training and various experiment pipelines respectively) with their respective arguments as CLI. For instance to train the proposed VGG16 model without fine-tuning the it and with the original train data for 10 epochs for the binary classification task run:
     ```bash
     python run_training.py --classification_type bc --class_balance_type none
     ```
@@ -33,7 +33,7 @@ This repository contains the codes for all the experiments performed in the pape
 
 If you use this work in your project, please reference:
 
-    @article{OLUSEGUNETAL2024,
+    @article{OLUSEGUNETAL2025,
         title = {Deep Learning Approaches for the Classification of Keloid Images in the Context of Malignant and Benign Skin Disorders.},
         author = {Olusegun Ekundayo and Brice Chatelain and Dumitru Trucu and Raluca Eftimie},
         journal = {...},
