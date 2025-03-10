@@ -11,12 +11,40 @@ def load_train_data(class_balance_type:str,
                     resize_shape:tuple,
                     train_dir:str,        
                     )->tuple:
-    """
-    load train data
     
-    
-    """
     # load the data
+    """
+    Loads and processes training data with optional class balancing.
+
+    This function loads image data from a specified directory, resizes the images 
+    according to a given shape, and applies optional class balancing techniques 
+    such as augmentation or oversampling based on the specified class balance type.
+
+    Parameters
+    ----------
+    class_balance_type : str
+        Specifies the type of class balancing to apply. Must be one of 'aug', 'ovs', or 'none'.
+        'aug' applies data augmentation, 'ovs' applies oversampling, and 'none' applies no balancing.
+    classification_type : str
+        Specifies the type of classification to perform. Generally, it should be 'mc' (multi-class) 
+        or 'bc' (binary classification).
+    resize_shape : tuple
+        The target size for resizing images, specified as (width, height).
+    train_dir : str
+        The directory path containing the training images.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the processed features and target arrays. The features are image data 
+        and the target is the associated labels.
+    
+    Raises
+    ------
+    ValueError
+        If the `class_balance_type` is not one of 'aug', 'ovs', or 'none'.
+    """
+
     loaded_train_data = data_loading(data_dir = train_dir)
 
     # resize the data
@@ -51,12 +79,30 @@ def load_test_or_val_data(classification_type:str,
                             resize_shape: tuple, 
                             dir:str,              
                             )->tuple:
-    """
-    classification_type:        takes a str 'mc' or 'bc'
-    resize_shape:               takes a tuple of int
-    """
+    
     
     # load test data
+    """
+    Loads and resizes the test or validation data.
+
+    This function loads image data from a specified directory.
+
+    Parameters
+    ----------
+    classification_type : str
+        Specifies the type of classification to perform. Generally, it should be 'mc' (multi-class) 
+        or 'bc' (binary classification).
+    resize_shape : tuple
+        The target size for resizing images, specified as (width, height).
+    dir : str
+        The directory path containing the test or validation images.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the resized features and target arrays. The features are image data 
+        and the target is the associated labels.
+    """
     loaded_test_data = data_loading(data_dir = dir)
 
     # resize test data

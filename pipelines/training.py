@@ -19,6 +19,39 @@ def training_pipeline(
     custom=None,
 ) -> None:
     
+    """
+    This function is the pipeline for training a model. It loads the data, 
+    performs cross-validation if specified, trains the final model, evaluates 
+    the model performance, plots the accuracy history, saves the model, and 
+    plots and saves the confusion matrix and the auc-roc curve.
+
+    Parameters
+    ----------
+    classification_type : str
+        The type of classification to perform. 
+        It can be 'mc' for multi-class, 'bc' for binary-class, or 'kl' for 
+        binary-class with different labels.
+    class_balance_type : str
+        The type of class balancing to perform. 
+        It can be 'aug' for augmentation, 'ovs' for oversampling, or 'none' 
+        for no class balancing.
+    basemodel : keras.Model
+        The base model to use for training.
+    fine_tune : bool
+        Whether to fine tune the base model.
+    no_epochs : int
+        The number of epochs to train the model.
+    cv : bool
+        Whether to perform cross-validation.
+    output_dir : str
+        The directory to save the results.
+    custom : str
+        The custom model to use for training. If None, the base model is used.
+
+    Returns
+    -------
+    None
+    """
     config_logger()
     logger = logging.getLogger(__name__)
 
@@ -70,7 +103,7 @@ def training_pipeline(
         # Redirecting output to a file for cross-validation results
         cv_fname = 'cv_result.txt'
         cv_save_path = os.path.join(output_dir, cv_fname)
-        logger.info(f"Saving cross validation result")
+        logger.info(f"Saving cross validation result to {cv_save_path}")
         with open(cv_save_path, 'w') as f:
             f.write(f"Average accuracy: {crossvalresult.avg_accuracy_score}\n")
             f.write(f"Average precision: {crossvalresult.avg_precision}\n")
@@ -140,7 +173,7 @@ def training_pipeline(
 
     mp_fname = 'model_performance.txt'
     mp_save_path = os.path.join(output_dir, mp_fname)
-    logger.info(f"Saving cross validation result")
+    logger.info(f"Saving cross validation result to {mp_save_path}")
 
     # Save model performance metrics to a file
     with open(mp_save_path, 'w') as f:

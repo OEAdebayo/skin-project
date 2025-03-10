@@ -5,7 +5,6 @@ import seaborn as sns
 import numpy as np
 from sklearn.metrics import confusion_matrix,roc_curve, roc_auc_score
 from keras import models
-from tensorflow.keras.models import load_model
 
 
 
@@ -17,22 +16,28 @@ def accuracy_history(modelHist:dict,
                      alpha:float=1.0,
                      fontsize=20, 
                      ) -> None:
-    """
-    Function to plot and save the model accuracy over epochs.
-
-    Args:
-    ----
-        - modelHist:        Dictionary containing training accuracy and validation accuracy.
-        - figsize:          Tuple specifying the figure size.
-        - alpha:            Float specifying the transparency of the plot lines.
-        - fontsize:         Integer specifying the font size for plot labels.
-        - output_dir:       The directory where the accuracy plot will be saved. Defaults to 'output'.
-
-    Returns:
-    -------
-        None
-    """
+    
     # Extract accuracy values from the history dictionary
+    """
+    Saves the accuracy history of a model as a plot.
+
+    Parameters
+    ----------
+    modelHist : dict
+        The history dictionary of the model.
+    output_dir : str
+        The directory where the plot will be saved.
+    figsize : tuple, optional
+        The size of the figure in inches. Defaults to (8, 6).
+    alpha : float, optional
+        The transparency of the plot lines. Defaults to 1.0.
+    fontsize : int, optional
+        The font size of the plot labels. Defaults to 20.
+
+    Returns
+    -------
+    None
+    """
     Acc_values = modelHist.get('accuracy')
     val_acc_values = modelHist.get('val_accuracy')
 
@@ -74,21 +79,26 @@ def conf_mat(model: models.Model,
              y_dat: np.ndarray,
              classification_type: str,
              )-> None:
+
     """
-    Function to generate and save a confusion matrix plot.
+    Saves the confusion matrix of a model as a plot.
 
-    Args:
-    ----
-        - model:                    The trained keras model used for predictions.
-        - output_dir:               The directory where the confusion matrix plot will be saved. Defaults to 'output'.
-        - x_dat:                    The input data for prediction.
-        - y_dat:                    The true labels.
-        - classification_type:      Type of classification ('mc' for multi-class, 'bc' for binary-class).
-        
+    Parameters
+    ----------
+    model : keras.Model
+        The trained model.
+    output_dir : str
+        The directory where the plot will be saved.
+    x_dat : np.ndarray
+        The input data for prediction.
+    y_dat : np.ndarray
+        The true labels.
+    classification_type : str
+        The type of classification to perform. Must be one of 'bc', 'mc', or 'kl'.
 
-    Returns:
+    Returns
     -------
-        None
+    None
     """
 
     if classification_type not in ("mc", "bc", "kl"):
@@ -139,24 +149,24 @@ def roc_curve_plot(model: models.Model,
                    x_dat: np.ndarray, 
                    y_dat: np.ndarray,
                    classification_type: str) -> None:
+   
+    
+    #model = load_model(model_dir)
     """
     Function to generate and save a ROC curve plot.
 
     Args:
     ----
         - model:                    The trained keras model used for predictions.
-        - output_dir:               The directory where the ROC curve plot will be saved.
+        - output_dir:               The directory where the ROC curve plot will be saved. Defaults to 'output'.
         - x_dat:                    The input data for prediction.
         - y_dat:                    The true labels.
         - classification_type:      Type of classification ('mc' for multi-class, 'bc' for binary-class).
-        
 
     Returns:
     -------
         None
     """
-    
-    #model = load_model(model_dir)
     if classification_type not in ("mc", "bc", "kl"):
         raise ValueError(f"The 'classification_type' parameter only takes values 'mc', 'bc' or 'kl' but classification_type: {classification_type} was given.")
     

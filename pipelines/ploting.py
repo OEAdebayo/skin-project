@@ -3,7 +3,6 @@ from steps.data_load import load_test_or_val_data
 from utils.data_prep import standardize_test_data
 from steps.plots import roc_curve_plot
 from utils.save_log_data import config_logger
-from keras import models
 import os
 
 
@@ -14,13 +13,28 @@ def roc_curve_plot_pipeline(
     output_dir: str,
 ) -> None:
     
+    """
+    Pipeline to generate and save a ROC curve plot for a given model from a file.
+
+    Parameters
+    ----------
+    classification_type : str
+        The type of classification to perform. Must be one of 'mc' or 'bc'.
+    model_dir : os.path
+        The directory where the trained model is located.
+    output_dir : str
+        The directory where the ROC curve plot will be saved.
+
+    Returns
+    -------
+    None
+    """
     config_logger()
     logger = logging.getLogger(__name__)
 
     # Load data
     logger.info("Loading test data...")
     
-    #FIXME
     X_test, y_test = load_test_or_val_data(
         classification_type=classification_type,
         resize_shape=(128, 128), 

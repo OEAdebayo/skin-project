@@ -17,6 +17,30 @@ def model_metric(model: models.Model,
                  y_dat: np.ndarray,
                  classification_type: str) -> ModelPerformance:
     
+    """
+    Evaluate the performance of a model on a given dataset.
+
+    Parameters
+    ----------
+    model : keras.Model
+        The model to evaluate.
+    x_dat : np.ndarray
+        The input data.
+    y_dat : np.ndarray
+        The true labels.
+    classification_type : str
+        The type of classification. Must be either 'mc' (multi-class), 'kl' (Keloid) or 'bc' (binary-class).
+
+    Returns
+    -------
+    ModelPerformance
+        An object containing the evaluation metrics.
+
+    Raises
+    ------
+    ValueError
+        If the value of `classification_type` is not one of 'mc', 'kl', or 'bc'.
+    """
     if classification_type not in ("mc", "bc", "kl"):
         raise ValueError(f"The 'classification_type' parameter only takes values 'mc' , 'kl' or 'bc' but classification_type: {classification_type} was given")
 

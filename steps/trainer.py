@@ -16,6 +16,49 @@ def get_fitted_model_bc(input_shape: tuple,
                         cv: bool = False,
                         basemodel=None, 
                         batch_size: int = 32):
+    """
+    Create and train a binary classification model using either a custom architecture or a pre-trained model for transfer learning.
+
+    Parameters
+    ----------
+    input_shape : tuple
+        Shape of the input data.
+    X_train : np.ndarray
+        Training data features.
+    y_train : np.ndarray
+        Training data labels.
+    X_val : np.ndarray, optional
+        Validation data features. Required if `cv` is False.
+    y_val : np.ndarray, optional
+        Validation data labels. Required if `cv` is False.
+    fine_tune : bool, optional
+        Whether to fine-tune the pre-trained model layers. Default is False.
+    custom : bool, optional
+        Whether to use a custom model architecture. Default is None.
+    no_epochs : int, optional
+        Number of epochs for training. Default is 50.
+    cv : bool, optional
+        Whether to perform cross-validation. Default is False.
+    basemodel : keras.Model, optional
+        Pre-trained model to use for transfer learning. Default is None.
+    batch_size : int, optional
+        Batch size for training. Default is 32.
+
+    Returns
+    -------
+    If `cv` is True:
+        keras.Model
+            The compiled model ready for cross-validation.
+    If `cv` is False:
+        tuple of (keras.Model, keras.callbacks.History)
+            The trained model and its training history.
+
+    Raises
+    ------
+    ValueError
+        If `X_val` and `y_val` are not provided when `cv` is False.
+    """
+
     if custom:
         model = models.Sequential([
         layers.Input(shape=input_shape),
@@ -54,7 +97,7 @@ def get_fitted_model_bc(input_shape: tuple,
             layers.Dense(1, activation='sigmoid')
         ])
 
-    if fine_tune==True:
+    if fine_tune:
         optimizer = optimizers.Adam(learning_rate=0.00001)
     else:
         optimizer = optimizers.Adam(learning_rate=0.0001)
@@ -87,6 +130,48 @@ def get_fitted_model_mc(input_shape: tuple,
                         cv: bool = False,
                         basemodel=None, 
                         batch_size: int = 32):
+    """
+    Create and train a multi-class classification model using either a custom architecture or a pre-trained model for transfer learning.
+
+    Parameters
+    ----------
+    input_shape : tuple
+        Shape of the input data.
+    X_train : np.ndarray
+        Training data features.
+    y_train : np.ndarray
+        Training data labels.
+    X_val : np.ndarray, optional
+        Validation data features. Required if `cv` is False.
+    y_val : np.ndarray, optional
+        Validation data labels. Required if `cv` is False.
+    fine_tune : bool, optional
+        Whether to fine-tune the pre-trained model layers. Default is False.
+    custom : bool, optional
+        Whether to use a custom model architecture. Default is None.
+    no_epochs : int, optional
+        Number of epochs for training. Default is 50.
+    cv : bool, optional
+        Whether to perform cross-validation. Default is False.
+    basemodel : keras.Model, optional
+        Pre-trained model to use for transfer learning. Default is None.
+    batch_size : int, optional
+        Batch size for training. Default is 32.
+
+    Returns
+    -------
+    If `cv` is True:
+        keras.Model
+            The compiled model ready for cross-validation.
+    If `cv` is False:
+        tuple of (keras.Model, keras.callbacks.History)
+            The trained model and its training history.
+
+    Raises
+    ------
+    ValueError
+        If `X_val` and `y_val` are not provided when `cv` is False.
+    """
     if custom:
         model = models.Sequential([
         layers.Input(shape=input_shape),
@@ -125,7 +210,7 @@ def get_fitted_model_mc(input_shape: tuple,
             layers.Dense(3, activation='softmax')
         ])
 
-    if fine_tune==True:
+    if fine_tune:
         optimizer = optimizers.Adam(learning_rate=0.00001)
     else:
         optimizer = optimizers.Adam(learning_rate=0.0001)
@@ -166,6 +251,37 @@ def cross_val(X: np.ndarray,
               input_shape: tuple,
               fine_tune: bool,
               no_epochs: int) -> CrossValidation:
+
+    """
+    Perform cross-validation on a given dataset using a specified model.
+
+    This function conducts cross-validation to evaluate the performance of a classification model
+    on a dataset. It supports multi-class ('mc'), keloid ('kl'), and binary-class ('bc') classification
+    types. The function returns the average evaluation metrics across all folds.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        The input data.
+    y : np.ndarray
+        The target labels.
+    basemodel : 
+        The pre-trained model to use for transfer learning.
+    classification_type : str
+        The type of classification ('mc', 'kl', or 'bc').
+    input_shape : tuple
+        The shape of the input data.
+    fine_tune : bool
+        Whether to fine-tune the pre-trained model.
+    no_epochs : int
+        The number of epochs for training.
+
+    Returns
+    -------
+    CrossValidation
+        An object containing the average accuracy, recall, f1 score, precision, and AUC scores,
+        along with the cross-validated model.
+    """
 
     num_folds = 5
     Skf = StratifiedKFold(n_splits=num_folds)

@@ -16,19 +16,28 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # 0 = all logs, 1 = filter out INFO, 2
 
 def data_loading(data_dir: Path)-> object:
 
-    """
-    Function that converts the train and test data into a dataframe.
 
-    Args:
-    ----
-        -data:   a directory to the image data for training
-
-    Returns:
-    -------
-           A DataFrames object
-    """
-    
     # Create an empty dataframes
+    """
+    Loads image data from a specified directory into a DataFrame.
+
+    This function iterates through all subdirectories within a given directory,
+    assuming each subdirectory represents a class label. It constructs a DataFrame
+    where each row contains the path to an image file and its corresponding label.
+
+    Parameters
+    ----------
+    data_dir : Path
+        The path to the directory containing subdirectories of images, where each 
+        subdirectory is named according to the class label of the images it contains.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame with two columns: 'image_path' containing the full path to each 
+        image file, and 'label' containing the class label of each image.
+    """
+
     df = pd.DataFrame(columns=['image_path', 'label'])
    
     for directory in os.listdir(data_dir):
@@ -49,28 +58,44 @@ def data_class_restructuring(df,
                              image_path= "image_path",
                              class_label = "label", 
                              ) -> object:
-    """
-    Function converts the classes in the dataframe to either malignant or benign.
-
-    Args:
-    ----
-        -df:                     a DataFrame object with 10 classes
-        -classification_type     a str of maliangnat vs benign--'bc' or maliagnant vs benign vs keloids--'mc'
-        -resize(tuple):          a tuple of integers (a(int), b(int)) containing the new size we wish to have
-        -image(str):             a column in df that takes exactly the string 'image_path' if given. Should be given if and only if arg: resize is given
-        -image_path(str):        a column in df that takes exactly the string 'image_path' if given. Should be given if and only if arg: resize is given
-        -class_label(str):       the old label to drop after reclassifying df 
-        -new_column(str):        The name of the new label 
     
-    Returns:
-    -------
-           A DataFrame object with two classes: 1 -> malignant, 0 -> benign or three classes 2-> Keloid, 1 -> malignant, 0 -> benign
-
-
-    """
     #if (resize and image and image_path):
        
     # Get the number of CPU cores available
+
+    """
+    Restructures a DataFrame by resizing images and modifying class labels based on classification type.
+
+    This function resizes images specified in a DataFrame and updates class labels according to the
+    specified classification type, which can be 'bc' (binary classification), 'mc' (multi-class classification),
+    or 'kl' (keloid classification). The images are resized in parallel using multiple CPU cores.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The input DataFrame containing image paths and class labels.
+    resize : tuple
+        The target size for resizing images, specified as (width, height).
+    classification_type : str
+        The type of classification to perform. Must be one of 'bc', 'mc', or 'kl'.
+    image : str, optional
+        The column name in the DataFrame where resized images will be stored. Defaults to 'image'.
+    image_path : str, optional
+        The column name containing paths to the images. Defaults to 'image_path'.
+    class_label : str, optional
+        The column name containing class labels. Defaults to 'label'.
+
+    Returns
+    -------
+    pd.DataFrame
+        A new DataFrame with resized images and updated class labels.
+
+    Raises
+    ------
+    ValueError
+        If the `classification_type` is not one of 'bc', 'mc', or 'kl'.
+    """
+
     max_workers = multiprocessing.cpu_count()
     import concurrent.futures
 
@@ -164,20 +189,27 @@ def data_augmentation(df:pd.DataFrame,
                       class_image_limit: int,  
                       class_label:str='label', 
                       column_list:list = ['image_path', 'label', 'image'])-> object:
-    """
-    Function to augment a dataframe.
-
-    Args:
-    ----
-        -df:                    a DataFrame object
-        -class_image_limit:     expected maximum number of images  per class
-        -column_names:          a list of strings containing the column names for the augmented dataframe in this order ["image_path", "classcode", "image"]
     
-    Returns:
+    """
+    Function to perform data augmentation on a given dataframe of image arrays.
+    
+    The function takes in a dataframe of image arrays, a class image limit, a class label column name, and column names for the image path, label and image. It then performs data augmentation on the images in each class until the number of images in each class is equal to the class image limit. The augmented images are then added to a new dataframe, which is shuffled randomly before being returned.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe of image arrays.
+    class_image_limit : int
+        The number of images each class should have after augmentation.
+    class_label : str, optional
+        The name of the class label column in the dataframe. Defaults to 'label'.
+    column_list : list, optional
+        A list of column names for the image path, label and image in the dataframe. Defaults to ['image_path', 'label', 'image'].
+    
+    Returns
     -------
-           A DataFrame object with two classes containing "class_image_limit" number of images per class
-
-
+    pd.DataFrame
+        The dataframe with the augmented images.
     """
     new_augment_df = pd.DataFrame(columns=column_list)
 
@@ -241,28 +273,45 @@ def data_augmentation(df:pd.DataFrame,
     return df_shuffled
  
 def features_target(df:pd.DataFrame):
-    """
-    Function to extract features and target from a dataframe
     
+    """
+    Splits a DataFrame into features and target arrays.
+
+    Args:
+    ----
+        - df: A DataFrame containing the data to be split into features and target arrays.
+
+    Returns:
+    -------
+        A tuple containing two elements: features and target. The features array is a DataFrame
+        containing all columns of the input DataFrame except 'label' and 'image_path'. The target
+        array is a Series containing the class labels of the input DataFrame.
     """
     features = df.drop(columns=['label','image_path'],axis=1)
     target = df['label']
     return features, target
 
 def data_oversample(X: np.ndarray, y: np.ndarray) -> dict:
+
     """
-    Function to oversample data.
+    Randomly oversample the minority class in a dataset.
 
-    Args:
-    ----
-        - X: A multi-dimensional numpy array representing the pixels of an image.
-        - y: A 1-dimensional numpy array of integers containing the class of the features in X.
+    Parameters
+    ----------
+    X : numpy array
+        The features of the dataset. It should be either a 2D array
+        (e.g. for tabular data) or a 4D array (e.g. for images).
+    y : numpy array
+        The class labels of the dataset.
 
-    Returns:
+    Returns
     -------
-        A dictionary containing the resampled X--features and y--target values.
+    A dictionary containing the resampled features and labels.
+    The keys of the dictionary are 'X_resampled' and 'y_resampled'.
+    The values are the resampled features and labels, respectively.
+    The resampled features are returned as a 4D array if the input X was 4D;
+    otherwise, it is returned as a 2D array.
     """
-
     if len(X.shape) == 2:
         # If X is already a 2D array, no need to reshape
         X_train_reshaped = X
@@ -309,25 +358,33 @@ def standardize_data(
         test_target: np.ndarray,
         classification_type:str,
         )->TrainTestData:
+    
+
     """
-    Function to standardize the dataset.
-    Args:
-    ----
-
-        train_features (array):               an array of train feautures
-        train_target (array):                 an array of train target values
-        val_features (array):                 an array of validation feautures
-        val_target (array):                   an array of validation target values
-        test_features (array):                an array of test feautures
-        test_target (array):                  an array of test target values
-        classification_type (str):            default("mc") set to "bc" for binary classification 
-
-    Returns:
+    Standardizes the data by subtracting the mean and dividing by the standard deviation.
+    
+    Parameters
+    ----------
+    train_features : np.ndarray
+        The array of training features.
+    train_target : np.ndarray
+        The array of training target values.
+    val_features : np.ndarray
+        The array of validation features.
+    val_target : np.ndarray
+        The array of validation target values.
+    test_features : np.ndarray
+        The array of testing features.
+    test_target : np.ndarray
+        The array of testing target values.
+    classification_type : str
+        The type of classification to perform. Must be one of 'mc', 'kl', or 'bc'.
+    
+    Returns
     -------
-            A class instance with these attributes: X_train, y_train, X_val, y_val, X_test, y_test.
-
+    TrainTestData
+        A class instance with the following attributes: X_train, y_train, X_val, y_val, X_test, y_test.
     """
-
     X_train = np.asarray(train_features['image'].tolist())
     y_train = np.asarray(train_target.tolist())
     X_val = np.asarray(val_features['image'].tolist())
@@ -382,18 +439,33 @@ def standardize_test_data(
         test_target: np.ndarray,
         classification_type:str,
         )->TestData:
+    
+
     """
-    Function to standardize the dataset.
-    Args:
-    ----
-        test_features (array):                an array of test feautures
-        test_target  (array):                 an array of test target values
-        classification_type (str):            default("mc") set to "bc" for binary classification 
+    Standardizes test feature data and encodes the target based on classification type.
 
-    Returns:
+    This function takes in test features and target arrays, standardizes the feature data,
+    and encodes the target labels according to the specified classification type. It supports
+    multi-class ('mc'), keloid ('kl'), and binary classification ('bc') types.
+
+    Parameters
+    ----------
+    test_features : np.ndarray
+        An array containing the test features, expected to have an 'image' column.
+    test_target : np.ndarray
+        An array containing the test target labels.
+    classification_type : str
+        The type of classification to perform. Must be one of 'mc', 'kl', or 'bc'.
+
+    Returns
     -------
-            A class instance with these attributes: X_train, y_train, X_val, y_val, X_test, y_test.
+    TestData
+        An instance containing standardized test features and appropriately encoded target labels.
 
+    Raises
+    ------
+    ValueError
+        If the `classification_type` is not one of 'mc', 'bc', or 'kl'.
     """
 
     X_test = np.asarray(test_features['image'].tolist())
@@ -435,23 +507,39 @@ def standardize_and_merge(
         val_target: np.ndarray,
         classification_type:str,
         )-> MergeData:
+    
+
     """
-    Function to split the data into train and validation set.
-    Args:
-    ----
+    Standardizes feature data and encodes the target based on classification type.
 
-        train_features:               an array of train feautures
-        train_target:                 an array of train target values
-        val_features:                 an array of validation feautures
-        val_target:                   an array of validation target values
-        classification_type:          default("mc") set to "bc" for binary classification
+    This function takes in feature and target arrays for training and validation data,
+    standardizes the feature data, and encodes the target labels according to the specified
+    classification type. It supports multi-class ('mc'), keloid ('kl'), and binary classification
+    ('bc') types.
 
-    Returns:
+    Parameters
+    ----------
+    train_features : np.ndarray
+        An array containing the training features, expected to have an 'image' column.
+    train_target : np.ndarray
+        An array containing the training target labels.
+    val_features : np.ndarray
+        An array containing the validation features, expected to have an 'image' column.
+    val_target : np.ndarray
+        An array containing the validation target labels.
+    classification_type : str
+        The type of classification to perform. Must be one of 'mc', 'kl', or 'bc'.
+
+    Returns
     -------
-            A class instance with these attributes: X_data, y_data.
+    MergeData
+        An instance containing standardized feature data and appropriately encoded target labels.
 
+    Raises
+    ------
+    ValueError
+        If the `classification_type` is not one of 'mc', 'bc', or 'kl'.
     """
-
     X_train = np.asarray(train_features['image'].tolist())
     y_train = np.asarray(train_target.tolist())
     X_val = np.asarray(val_features['image'].tolist())
