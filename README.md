@@ -1,6 +1,8 @@
 # skin-project
 This repository contains the codes for all the experiments performed in the paper [Machine learning and deep learning approaches for classifying keloid images in the context of malignant and benign skin disorders.](https://www.mdpi.com/2075-4418/15/6/710)
 
+## About
+The classical approach to diagnose various skin disorders (including keloids) uses dermatoscopy. However, this medical device is perceived to be too complex and quite expensive to use. We propose a deep learning model using transfer learning to identify non-dermatoscopic (clinical) images of keloids among other benign and malignant skin lesions.
 
 ## Set up for running locally
 1. Clone the repository by running
@@ -28,7 +30,7 @@ This repository contains the codes for all the experiments performed in the pape
     ```bash
     make setup
     ```
-
+## Usage
 1. You can then start running entry point (`run_training.py` for the model training and various experiment pipelines respectively) with their respective arguments as CLI. For instance to train the proposed VGG16 model without fine-tuning the it and with the original train data for 10 epochs for the binary classification task run:
     ```bash
     python run_training.py --classification_type bc --class_balance_type none
@@ -38,7 +40,9 @@ This repository contains the codes for all the experiments performed in the pape
     To see all the available arguments or options to an entry point, e.g., for training pipeline entry point run:
     ```bash
     python run_training.py --help
+   
     ```
+## References
 If you use this work in your project, please reference:
 
     @article{OLUSEGUNETAL2025,
