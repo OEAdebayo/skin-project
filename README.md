@@ -44,11 +44,10 @@ If you use this work in your project, please reference:
     @article{OLUSEGUNETAL2025,
         title = {Deep Learning Approaches for the Classification of Keloid Images in the Context of Malignant and Benign Skin Disorders.},
         author = {Olusegun Ekundayo and Brice Chatelain and Dumitru Trucu and Raluca Eftimie},
-        journal = {...},
-        volume = {...},
-        pages = {...},
+        journal = {Diagnostics},
+        volume = {15},
         year = {2025},
-        issn = {...},
-        doi = {...},
-        url = {https://www...}
+        issn = {6},
+        pages={710}
+        doi = {10.3390/diagnostics15060710},
     }
