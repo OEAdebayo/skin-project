@@ -74,7 +74,7 @@ If you use this work in your project, please cite the following paper:
 ```
 
 ## License
-This project is released under the [MIT License](LICENSE).
+This project is released under the [Creative Commons Attribution 4.0 International License](LICENSE).
 
 ---
 
