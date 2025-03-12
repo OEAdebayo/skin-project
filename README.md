@@ -48,6 +48,6 @@ If you use this work in your project, please reference:
         volume = {15},
         year = {2025},
         issn = {6},
-        pages={710}
+        pages={710},
         doi = {10.3390/diagnostics15060710},
     }
