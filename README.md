@@ -1,5 +1,5 @@
 # skin-project
-This repository contains the codes for all the experiments performed in the paper [Machine learning and deep learning approaches for classifying keloid images in the context of malignant and benign skin disorders.](https://www...)
+This repository contains the codes for all the experiments performed in the paper [Machine learning and deep learning approaches for classifying keloid images in the context of malignant and benign skin disorders.](https://www.mdpi.com/2075-4418/15/6/710)
 
 
 ## Set up for running locally
@@ -50,4 +50,5 @@ If you use this work in your project, please reference:
         issn = {6},
         pages={710},
         doi = {10.3390/diagnostics15060710},
+        url={https://www.mdpi.com/2075-4418/15/6/710}
     }
